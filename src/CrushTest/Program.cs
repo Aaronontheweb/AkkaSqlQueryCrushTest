@@ -34,8 +34,6 @@ var builder = new HostBuilder()
                     foreach (var id in EntityIds.AllEntityIds)
                     {
                         var actorRef = system.ActorOf(Props.Create(() => new InputActor(id)), id);
-                        foreach (var i in Enumerable.Range(0, 10))
-                            actorRef.Tell(i);
                     }
                 })
                 .AddStartup((system, registry) =>
