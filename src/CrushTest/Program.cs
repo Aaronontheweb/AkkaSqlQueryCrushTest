@@ -1,6 +1,7 @@
 ﻿// See https://aka.ms/new-console-template for more information
 
 using Akka.Actor;
+using Akka.Actor.Dsl;
 using Akka.Hosting;
 using Akka.Persistence.SqlServer.Hosting;
 using CrushTest;
@@ -17,11 +18,17 @@ var builder = new HostBuilder()
         services.AddAkka("SqlSharding", (configurationBuilder, provider) =>
         {
             configurationBuilder
-                
                 .WithSqlServerPersistence(connectionString)
                 // dial up pressure and force each query to run 10 times
                 .AddHocon(@"akka.persistence.query.journal.sql.max-buffer-size = 1
                 akka.persistence.query.journal.sql.refresh-interval = 1s", HoconAddMode.Prepend)
+                .WithActors((system, registry) =>
+                {
+                    var recoveryTracker =
+                        system.ActorOf(Props.Create(() => new RecoveryTracker(EntityIds.AllEntityIds.Length)),
+                            "recovery-tracker");
+                    registry.Register<RecoveryTracker>(recoveryTracker);
+                })
                 .AddStartup((system, registry) =>
                 {
                     foreach (var id in EntityIds.AllEntityIds)
@@ -33,12 +40,13 @@ var builder = new HostBuilder()
                 })
                 .AddStartup((system, registry) =>
                 {
+                    var recoveryTracker = registry.Get<RecoveryTracker>();
+                    
                     foreach (var id in EntityIds.AllEntityIds)
                     {
-                        var actorRef = system.ActorOf(Props.Create(() => new QueryActor(id)), $"projector-{id}");
+                        var actorRef = system.ActorOf(Props.Create(() => new QueryActor(id, recoveryTracker)), $"projector-{id}");
                     }
                 });
-
         });
     })
     .Build();

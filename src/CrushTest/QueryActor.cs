@@ -9,20 +9,22 @@ namespace CrushTest;
 
 public class QueryActor : ReceiveActor
 {
+    private readonly IActorRef _recoveryTracker;
     private readonly string _targetPersistentId;
     private int _total = 0;
 
-    public QueryActor(string targetPersistentId)
+    public QueryActor(string targetPersistentId, IActorRef recoveryTracker)
     {
         _targetPersistentId = targetPersistentId;
-        
+        _recoveryTracker = recoveryTracker;
+
         Receive<EventEnvelope>(e =>
         {
             _total++;
             if (_total == 10)
             {
                 Context.System.Log.Info("Completed recovery for entity {0}", _targetPersistentId);
-                Context.Stop(Self);
+                _recoveryTracker.Tell(RecoveryTracker.RecoveryComplete.Instance);
             }
         });
     }
