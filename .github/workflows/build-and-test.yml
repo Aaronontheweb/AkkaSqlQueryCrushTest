@@ -7,9 +7,6 @@ on:
     - dev
   pull_request:
     branches: [ master,dev ]
-    paths:
-    - '**.cs'
-    - '**.csproj'
 
 env:
   DOTNET_VERSION: '6.0' # The .NET SDK version to use
