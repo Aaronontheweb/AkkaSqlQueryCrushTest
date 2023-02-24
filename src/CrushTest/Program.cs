@@ -2,6 +2,7 @@
 
 using Akka.Actor;
 using Akka.Actor.Dsl;
+using Akka.Event;
 using Akka.Hosting;
 using Akka.Persistence.SqlServer.Hosting;
 using CrushTest;
@@ -18,6 +19,10 @@ var builder = new HostBuilder()
         services.AddAkka("SqlSharding", (configurationBuilder, provider) =>
         {
             configurationBuilder
+                .ConfigureLoggers(configBuilder =>
+                {
+                    configBuilder.LogLevel = LogLevel.DebugLevel;
+                })
                 .WithSqlServerPersistence(connectionString)
                 // dial up pressure and force each query to run 10 times
                 .AddHocon(@"akka.persistence.query.journal.sql.max-buffer-size = 10
@@ -29,29 +34,29 @@ var builder = new HostBuilder()
                             "recovery-tracker");
                     registry.Register<RecoveryTracker>(recoveryTracker);
                 })
-                .AddStartup(async (system, registry) =>
+                // .AddStartup(async (system, registry) =>
+                // {
+                //     var i = 0;
+                //     foreach (var id in EntityIds.AllEntityIds)
+                //     {
+                //         var actorRef = system.ActorOf(Props.Create(() => new InputActor(id)), id);
+                //         if (++i % 100 == 0)
+                //         {
+                //             //await Task.Delay(TimeSpan.FromSeconds(10));
+                //         }
+                //     }
+                //
+                //     await Task.Delay(TimeSpan.FromSeconds(5));
+                // });
+            .AddStartup((system, registry) =>
+            {
+                var recoveryTracker = registry.Get<RecoveryTracker>();
+                
+                foreach (var id in EntityIds.AllEntityIds)
                 {
-                    var i = 0;
-                    foreach (var id in EntityIds.AllEntityIds)
-                    {
-                        var actorRef = system.ActorOf(Props.Create(() => new InputActor(id)), id);
-                        if (++i % 100 == 0)
-                        {
-                            //await Task.Delay(TimeSpan.FromSeconds(10));
-                        }
-                    }
-
-                    await Task.Delay(TimeSpan.FromSeconds(5));
-                });
-            // .AddStartup((system, registry) =>
-            // {
-            //     var recoveryTracker = registry.Get<RecoveryTracker>();
-            //     
-            //     foreach (var id in EntityIds.AllEntityIds)
-            //     {
-            //         var actorRef = system.ActorOf(Props.Create(() => new QueryActor(id, recoveryTracker)), $"projector-{id}");
-            //     }
-            // });
+                    var actorRef = system.ActorOf(Props.Create(() => new QueryActor(id, recoveryTracker)), $"projector-{id}");
+                }
+            });
         });
     })
     .Build();
