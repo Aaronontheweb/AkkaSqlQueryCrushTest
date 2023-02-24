@@ -1,5 +1,6 @@
 ﻿using Akka;
 using Akka.Actor;
+using Akka.Event;
 using Akka.Persistence.Query;
 using Akka.Persistence.Query.Sql;
 using Akka.Streams;
