@@ -21,9 +21,9 @@ public class QueryActor : ReceiveActor
         Receive<EventEnvelope>(e =>
         {
             _total++;
-            if (_total == 10)
+            if (_total == 100)
             {
-                Context.System.Log.Info("Completed recovery for entity {0}", _targetPersistentId);
+                Context.System.Log.Info("Completed v1.5 recovery for entity {0}", _targetPersistentId);
                 _recoveryTracker.Tell(RecoveryTracker.RecoveryComplete.Instance);
             }
         });

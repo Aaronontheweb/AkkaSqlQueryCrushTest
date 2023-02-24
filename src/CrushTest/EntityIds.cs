@@ -2,5 +2,5 @@
 
 public static class EntityIds
 {
-    public static readonly string[] AllEntityIds = Enumerable.Range(0, 1000).Select(i => $"entity-{i}").ToArray();
+    public static readonly string[] AllEntityIds = Enumerable.Range(0, 100_000).Select(i => $"entity-{i}").ToArray();
 }
