@@ -12,19 +12,22 @@ public class InputActor : ReceivePersistentActor
     {
         PersistenceId = persistenceId;
 
-        Command<int>(str =>
+        Command<string>(str =>
         {
-            Persist(str, s =>
+            var items = Enumerable.Range(0, 10).ToArray();
+            _log.Info("Writing {0} items", items.Length);
+            
+            PersistAll(items, s =>
             {
-                _log.Info("Received {0}", s);
             });
         });
     }
-    
+
+    public override Recovery Recovery => Recovery.None;
+
     protected override void PreStart()
     {
-        foreach (var i in Enumerable.Range(0, 10))
-            Self.Tell(i);
+        Self.Tell("write");
     }
 
     public override string PersistenceId { get; }
