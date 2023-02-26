@@ -51,8 +51,9 @@ public class QueryActor : ReceiveActor
     private void StartQuery(long startSeqNo)
     {
         var query = Context.System.ReadJournalFor<SqlReadJournal>(SqlReadJournal.Identifier);
+        
         query.EventsByPersistenceId(_targetPersistentId, startSeqNo, long.MaxValue)
-            .To(Sink.ActorRef<EventEnvelope>(Self, Done.Instance, exception => new Status.Failure(exception)))
+            .To(Sink.ActorRef<EventEnvelope>(Self, Done.Instance))
             .Run(_materializer);
     }
 }

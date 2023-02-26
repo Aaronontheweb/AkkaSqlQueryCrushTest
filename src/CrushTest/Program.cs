@@ -9,6 +9,8 @@ using CrushTest;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 
+var start = DateTime.UtcNow;
+
 var builder = new HostBuilder()
     .ConfigureAppConfiguration(c => c.AddEnvironmentVariables()
         .AddJsonFile("appsettings.json"))
@@ -62,3 +64,5 @@ var builder = new HostBuilder()
     .Build();
 
 await builder.RunAsync();
+
+Console.WriteLine("Done in {0}", DateTime.UtcNow - start);
