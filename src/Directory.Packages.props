@@ -4,7 +4,7 @@
   </PropertyGroup>
   <!-- Akka.NET Package Versions -->
   <ItemGroup>
-    <PackageVersion Include="Akka.Persistence.SqlServer.Hosting" Version="1.0.3" />
+    <PackageVersion Include="Akka.Persistence.SqlServer.Hosting" Version="1.5.1" />
     <PackageVersion Include="Microsoft.NET.Build.Containers" Version="0.3.2" />
   </ItemGroup>
   <!-- ASP.NET Core Package Versions -->
